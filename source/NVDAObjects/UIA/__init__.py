@@ -220,7 +220,7 @@ class UIATextInfo(textInfos.TextInfo):
 				formatField["heading-level"]=(styleIDValue-UIAHandler.StyleId_Heading1)+1
 		if formatConfig["reportSpellingErrors"]:
 			annotationTypes=fetcher.getValue(UIAHandler.UIA_AnnotationTypesAttributeId,ignoreMixedValues=ignoreMixedValues)
-			if annotationTypes==UIAHandler.AnnotationType_SpellingError:
+			if annotationTypes==UIAHandler.AnnotationType_SpellingError or (isinstance(annotationTypes,tuple) and UIAHandler.AnnotationType_SpellingError in annotationTypes):
 				formatField["invalid-spelling"]=True
 		cultureVal=fetcher.getValue(UIAHandler.UIA_CultureAttributeId,ignoreMixedValues=ignoreMixedValues)
 		if cultureVal and isinstance(cultureVal,int):
