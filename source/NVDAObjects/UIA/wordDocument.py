@@ -25,9 +25,15 @@ class WordDocumentTextInfo(UIATextInfo):
 	def _getControlFieldForObject(self,obj,isEmbedded=False,startOfNode=False,endOfNode=False):
 		# Ignore strange editable text fields surrounding most inner fields (links, table cells etc) 
 		automationID=obj.UIAElement.cachedAutomationID
-		if obj.role==controlTypes.ROLE_EDITABLETEXT and (automationID=='Body' or automationID.startswith('UIA_AutomationId_Word_Content')):
+		if False: #obj.role==controlTypes.ROLE_EDITABLETEXT and (automationID=='Body' or automationID.startswith('UIA_AutomationId_Word_Content')):
 			return None
 		field=super(WordDocumentTextInfo,self)._getControlFieldForObject(obj,isEmbedded=isEmbedded,startOfNode=startOfNode,endOfNode=endOfNode)
+		if obj.parent.UIAElement.cachedAutomationID.startswith('UIA_AutomationId_Word_Page_'):
+			field['name']=obj.name
+			field['alwaysReportName']=True
+			field['role']=controlTypes.ROLE_FRAME
+		if obj.role==controlTypes.ROLE_LIST or obj.role==controlTypes.ROLE_EDITABLETEXT:
+			field['states'].add(controlTypes.STATE_READONLY)
 		if obj.role==controlTypes.ROLE_GRAPHIC:
 			# Label graphics with a description before name as name seems to be auto-generated (E.g. "rectangle")
 			field['value']=field.pop('description',None) or obj.description or field.pop('name',None) or obj.name
@@ -97,6 +103,9 @@ class WordDocumentTextInfo(UIATextInfo):
 		return fields
 
 class WordBrowseModeDocument(UIABrowseModeDocument):
+
+	def _get_isAlive(self):
+		return True
 
 	def shouldSetFocusToObj(self,obj):
 		# Ignore strange editable text fields surrounding most inner fields (links, table cells etc) 
