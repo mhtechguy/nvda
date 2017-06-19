@@ -53,7 +53,7 @@ badUIAWindowClassNames=[
 	"RichEdit20",
 	"RICHEDIT50W",
 	"SysListView32",
-	"_WwG",
+	#"_WwG",
 	'_WwN',
 	"EXCEL7",
 	"Button",

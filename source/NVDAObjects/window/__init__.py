@@ -124,7 +124,7 @@ An NVDAObject for a window
 			from .akelEdit import AkelEdit as newCls
 		elif windowClassName=="ConsoleWindowClass":
 			from .winConsole import WinConsole as newCls
-		elif windowClassName=="_WwG":
+		elif False: #windowClassName=="_WwG":
 			from .winword import WordDocument as newCls
 		elif windowClassName in ("_WwN","_WwO"):
 			from .winword import WordDocument_WwN as newCls
