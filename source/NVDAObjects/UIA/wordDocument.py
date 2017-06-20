@@ -3,9 +3,11 @@
 #See the file COPYING for more details.
 #Copyright (C) 2016 NV Access Limited
 
+from collections import defaultdict
 import textInfos
 import eventHandler
 import controlTypes
+import ui
 import speech
 import api
 from UIABrowseMode import UIABrowseModeDocument
@@ -146,3 +148,18 @@ class WordDocumentNode(UIA):
 class WordDocument(WordDocumentNode):
 	treeInterceptorClass=WordBrowseModeDocument
 	shouldCreateTreeInterceptor=False
+
+	def script_toggleBold(self,gesture):
+		gesture.send()
+		info=self.makeTextInfo(textInfos.POSITION_CARET)
+		info.expand(textInfos.UNIT_CHARACTER)
+		formatConfig=defaultdict(lambda: False,reportFontAttributes=True)
+		field=info._getFormatFieldAtRange(info._rangeObj,formatConfig,ignoreMixedValues=True).field
+		if field['bold']:
+			ui.message(_("Bold on"))
+		else:
+			ui.message(_("Bold off"))
+
+	__gestures={
+		"kb:control+b":"toggleBold",
+	}
