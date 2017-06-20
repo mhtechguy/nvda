@@ -239,6 +239,11 @@ class UIATextInfo(textInfos.TextInfo):
 			if formatConfig["reportComments"]:
 				if UIAHandler.AnnotationType_Comment in annotationTypes:
 					formatField["comment"]=True
+			if formatConfig["reportRevisions"]:
+				if UIAHandler.AnnotationType_InsertionChange in annotationTypes:
+					formatField["revision-insertion"]=True
+				if UIAHandler.AnnotationType_DeletionChange in annotationTypes:
+					formatField["revision-deletion"]=True
 		cultureVal=fetcher.getValue(UIAHandler.UIA_CultureAttributeId,ignoreMixedValues=ignoreMixedValues)
 		if cultureVal and isinstance(cultureVal,int):
 			try:
