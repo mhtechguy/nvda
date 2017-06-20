@@ -149,6 +149,8 @@ class UIATextInfo(textInfos.TextInfo):
 				IDs.add(UIAHandler.UIA_ForegroundColorAttributeId)
 			if formatConfig['reportLinks']:
 				IDs.add(UIAHandler.UIA_LinkAttributeId)
+			if formatConfig['reportStyle']:
+				IDs.add(UIAHandler.UIA_StyleNameAttributeId)
 			if formatConfig["reportHeadings"]:
 				IDs.add(UIAHandler.UIA_StyleIdAttributeId)
 			if formatConfig["reportSpellingErrors"] or formatConfig["reportComments"] or formatConfig["reportRevisions"]:
@@ -191,6 +193,10 @@ class UIATextInfo(textInfos.TextInfo):
 					textPosition="baseline"
 			if textPosition:
 				formatField['text-position']=textPosition
+		if formatConfig['reportStyle']:
+			val=fetcher.getValue(UIAHandler.UIA_StyleNameAttributeId,ignoreMixedValues=ignoreMixedValues)
+			if val!=UIAHandler.handler.reservedNotSupportedValue:
+				formatField["style"]=val
 		if formatConfig["reportAlignment"]:
 			val=fetcher.getValue(UIAHandler.UIA_HorizontalTextAlignmentAttributeId,ignoreMixedValues=ignoreMixedValues)
 			if val==UIAHandler.HorizontalTextAlignment_Left:
