@@ -3,7 +3,6 @@
 #See the file COPYING for more details.
 #Copyright (C) 2016 NV Access Limited
 
-import controlTypes
 import textInfos
 import eventHandler
 import controlTypes
@@ -28,10 +27,8 @@ class WordDocumentTextInfo(UIATextInfo):
 		if False: #obj.role==controlTypes.ROLE_EDITABLETEXT and (automationID=='Body' or automationID.startswith('UIA_AutomationId_Word_Content')):
 			return None
 		field=super(WordDocumentTextInfo,self)._getControlFieldForObject(obj,isEmbedded=isEmbedded,startOfNode=startOfNode,endOfNode=endOfNode)
-		if obj.parent.UIAElement.cachedAutomationID.startswith('UIA_AutomationId_Word_Page_'):
-			field['name']=obj.name
-			field['alwaysReportName']=True
-			field['role']=controlTypes.ROLE_FRAME
+		if automationID.startswith('UIA_AutomationId_Word_Page_'):
+			field['page-number']=automationID.rsplit('_',1)[-1]
 		if obj.role==controlTypes.ROLE_LIST or obj.role==controlTypes.ROLE_EDITABLETEXT:
 			field['states'].add(controlTypes.STATE_READONLY)
 		if obj.role==controlTypes.ROLE_GRAPHIC:
@@ -77,6 +74,15 @@ class WordDocumentTextInfo(UIATextInfo):
 
 	def getTextWithFields(self,formatConfig=None):
 		fields=super(WordDocumentTextInfo,self).getTextWithFields(formatConfig=formatConfig)
+		# Fill in page number attributes where NVDA expects
+		try:
+			page=fields[0].field['page-number']
+		except KeyError:
+			page=None
+		if page is not None:
+			for field in fields:
+				if isinstance(field,textInfos.FieldCommand) and isinstance(field.field,textInfos.FormatField):
+					field.field['page-number']=page
 		# MS Word can sometimes return a higher ancestor in its textRange's children.
 		# E.g. a table inside a table header.
 		# This does not cause a loop, but does cause information to be doubled
