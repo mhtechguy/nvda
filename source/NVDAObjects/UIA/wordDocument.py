@@ -13,6 +13,12 @@ from . import UIA, UIATextInfo
 
 class WordDocumentTextInfo(UIATextInfo):
 
+	def _getTextWithFields_text(self,textRange,formatConfig,UIAFormatUnits=None):
+		if UIAFormatUnits is None and self.UIAFormatUnits:
+			# Word documents must always split by a unit the first time, as an entire text chunk can give valid annotation types 
+			UIAFormatUnits=self.UIAFormatUnits
+		return super(WordDocumentTextInfo,self)._getTextWithFields_text(textRange,formatConfig,UIAFormatUnits=UIAFormatUnits)
+
 	def _get_controlFieldNVDAObjectClass(self):
 		return WordDocumentNode
 
