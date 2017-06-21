@@ -35,6 +35,11 @@ class WordDocumentTextInfo(UIATextInfo):
 		field=super(WordDocumentTextInfo,self)._getControlFieldForObject(obj,isEmbedded=isEmbedded,startOfNode=startOfNode,endOfNode=endOfNode)
 		if automationID.startswith('UIA_AutomationId_Word_Page_'):
 			field['page-number']=automationID.rsplit('_',1)[-1]
+		elif obj.role==0 and obj.name:
+			# Include foot note and endnote identifiers
+			field['name']=obj.name
+			field['alwaysReportName']=True
+			field['role']=controlTypes.ROLE_EMBEDDEDOBJECT
 		if obj.role==controlTypes.ROLE_LIST or obj.role==controlTypes.ROLE_EDITABLETEXT:
 			field['states'].add(controlTypes.STATE_READONLY)
 		if obj.role==controlTypes.ROLE_GRAPHIC:
