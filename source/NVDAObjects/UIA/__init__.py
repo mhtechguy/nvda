@@ -280,7 +280,7 @@ class UIATextInfo(textInfos.TextInfo):
 		elif position==textInfos.POSITION_LAST:
 			self._rangeObj=self.obj.UIATextPattern.documentRange
 			self.collapse(True)
-		elif position==textInfos.POSITION_ALL:
+		elif position==textInfos.POSITION_ALL or position is self.obj:
 			self._rangeObj=self.obj.UIATextPattern.documentRange
 		elif isinstance(position,UIA):
 			try:
