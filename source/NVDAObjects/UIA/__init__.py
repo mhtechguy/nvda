@@ -226,7 +226,7 @@ class UIATextInfo(textInfos.TextInfo):
 			val=fetcher.getValue(UIAHandler.UIA_LinkAttributeId,ignoreMixedValues=ignoreMixedValues)
 			if val!=UIAHandler.handler.reservedNotSupportedValue:
 				if val:
-					formatField['link']
+					formatField['link']=True
 		if formatConfig["reportHeadings"]:
 			styleIDValue=fetcher.getValue(UIAHandler.UIA_StyleIdAttributeId,ignoreMixedValues=ignoreMixedValues)
 			if UIAHandler.StyleId_Heading1<=styleIDValue<=UIAHandler.StyleId_Heading9: 
@@ -246,7 +246,7 @@ class UIATextInfo(textInfos.TextInfo):
 			if formatConfig["reportRevisions"]:
 				if UIAHandler.AnnotationType_InsertionChange in annotationTypes:
 					formatField["revision-insertion"]=True
-				if UIAHandler.AnnotationType_DeletionChange in annotationTypes:
+				elif UIAHandler.AnnotationType_DeletionChange in annotationTypes:
 					formatField["revision-deletion"]=True
 		cultureVal=fetcher.getValue(UIAHandler.UIA_CultureAttributeId,ignoreMixedValues=ignoreMixedValues)
 		if cultureVal and isinstance(cultureVal,int):
@@ -715,7 +715,7 @@ class UIA(Window):
 		UIAClassName=self.UIAElement.cachedClassName
 		if UIAClassName=="WpfTextView":
 			clsList.append(WpfTextView)
-		elif EditableTextWithoutAutoSelectDetection in clsList and (UIAClassName=='_WwG' or self.UIAElement.cachedAutomationID.startswith('UIA_AutomationId_Word_Content')):
+		elif EditableTextWithoutAutoSelectDetection in clsList and (UIAClassName=='_WwG' or self.windowClassName=='_WwG' or self.UIAElement.cachedAutomationID.startswith('UIA_AutomationId_Word_Content')):
 			from .wordDocument import WordDocument, WordDocumentNode
 			if self.role==controlTypes.ROLE_DOCUMENT:
 				clsList.append(WordDocument)

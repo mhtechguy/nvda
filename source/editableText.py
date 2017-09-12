@@ -157,7 +157,7 @@ class EditableText(ScriptableObject):
 		except (RuntimeError,NotImplementedError):
 			return
 		lineInfo.expand(textInfos.UNIT_LINE)
-		lineInfo.setEndPoint(newInfo,"endToStart")
+		#lineInfo.setEndPoint(newInfo,"endToStart")
 		if lineInfo.isCollapsed:
 			lineInfo.expand(textInfos.UNIT_CHARACTER)
 			onlyInitial=True
