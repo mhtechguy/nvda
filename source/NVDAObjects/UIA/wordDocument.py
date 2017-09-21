@@ -11,7 +11,7 @@ import controlTypes
 import ui
 import speech
 import api
-from UIABrowseMode import UIABrowseModeDocument
+from UIABrowseMode import UIABrowseModeDocument, UIADocumentWithTableNavigation
 from . import UIA, UIATextInfo
 
 class WordDocumentTextInfo(UIATextInfo):
@@ -155,7 +155,7 @@ class WordDocumentNode(UIA):
 			role=controlTypes.ROLE_EDITABLETEXT
 		return role
 
-class WordDocument(WordDocumentNode):
+class WordDocument(UIADocumentWithTableNavigation,WordDocumentNode):
 	treeInterceptorClass=WordBrowseModeDocument
 	shouldCreateTreeInterceptor=False
 
