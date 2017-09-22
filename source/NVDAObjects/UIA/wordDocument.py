@@ -13,6 +13,7 @@ import speech
 import api
 from UIABrowseMode import UIABrowseModeDocument, UIADocumentWithTableNavigation
 from . import UIA, UIATextInfo
+from NVDAObjects.window.winword import WordDocument as WordDocumentBase
 
 class WordDocumentTextInfo(UIATextInfo):
 
@@ -155,9 +156,18 @@ class WordDocumentNode(UIA):
 			role=controlTypes.ROLE_EDITABLETEXT
 		return role
 
-class WordDocument(UIADocumentWithTableNavigation,WordDocumentNode):
+class WordDocument(UIADocumentWithTableNavigation,WordDocumentNode,WordDocumentBase):
 	treeInterceptorClass=WordBrowseModeDocument
 	shouldCreateTreeInterceptor=False
+
+	def script_increaseDecreaseFontSize(self,gesture):
+		gesture.send()
+		info=self.makeTextInfo(textInfos.POSITION_CARET)
+		info.expand(textInfos.UNIT_CHARACTER)
+		formatConfig=defaultdict(lambda: False,reportFontSize=True)
+		field=info._getFormatFieldAtRange(info._rangeObj,formatConfig,ignoreMixedValues=True).field
+		# Translators: a message when increasing or decreasing font size in Microsoft Word
+		ui.message(_("{size:s} font").format(size=field['font-size']))
 
 	def script_toggleBold(self,gesture):
 		gesture.send()
@@ -166,10 +176,60 @@ class WordDocument(UIADocumentWithTableNavigation,WordDocumentNode):
 		formatConfig=defaultdict(lambda: False,reportFontAttributes=True)
 		field=info._getFormatFieldAtRange(info._rangeObj,formatConfig,ignoreMixedValues=True).field
 		if field['bold']:
+			# Translators: a message when toggling formatting in Microsoft word
 			ui.message(_("Bold on"))
 		else:
+			# Translators: a message when toggling formatting in Microsoft word
 			ui.message(_("Bold off"))
 
-	__gestures={
-		"kb:control+b":"toggleBold",
-	}
+	def script_toggleItalic(self,gesture):
+		gesture.send()
+		info=self.makeTextInfo(textInfos.POSITION_CARET)
+		info.expand(textInfos.UNIT_CHARACTER)
+		formatConfig=defaultdict(lambda: False,reportFontAttributes=True)
+		field=info._getFormatFieldAtRange(info._rangeObj,formatConfig,ignoreMixedValues=True).field
+		if field['italic']:
+			# Translators: a message when toggling formatting in Microsoft word
+			ui.message(_("Italic on"))
+		else:
+			# Translators: a message when toggling formatting in Microsoft word
+			ui.message(_("Italic off"))
+
+	def script_toggleUnderline(self,gesture):
+		gesture.send()
+		info=self.makeTextInfo(textInfos.POSITION_CARET)
+		info.expand(textInfos.UNIT_CHARACTER)
+		formatConfig=defaultdict(lambda: False,reportFontAttributes=True)
+		field=info._getFormatFieldAtRange(info._rangeObj,formatConfig,ignoreMixedValues=True).field
+		if field['underline']:
+			# Translators: a message when toggling formatting in Microsoft word
+			ui.message(_("Underline on"))
+		else:
+			# Translators: a message when toggling formatting in Microsoft word
+			ui.message(_("Underline off"))
+
+	def script_toggleSuperscriptSubscript(self,gesture):
+		gesture.send()
+		info=self.makeTextInfo(textInfos.POSITION_CARET)
+		info.expand(textInfos.UNIT_CHARACTER)
+		formatConfig=defaultdict(lambda: False,reportFontAttributes=True)
+		field=info._getFormatFieldAtRange(info._rangeObj,formatConfig,ignoreMixedValues=True).field
+		textPosition=field['text-position']
+		if textPosition=='super':
+			# Translators: a message when toggling formatting in Microsoft word
+			ui.message(_("superscript"))
+		elif textPosition=='sub':
+			# Translators: a message when toggling formatting in Microsoft word
+			ui.message(_("subscript"))
+		else:
+			# Translators: a message when toggling formatting in Microsoft word
+			ui.message(_("baseline"))
+
+	def script_increaseDecreaseOutlineLevel(self,gesture):
+		gesture.send()
+		info=self.makeTextInfo(textInfos.POSITION_CARET)
+		info.expand(textInfos.UNIT_CHARACTER)
+		formatConfig=defaultdict(lambda: False,reportStyle=True)
+		field=info._getFormatFieldAtRange(info._rangeObj,formatConfig,ignoreMixedValues=True).field
+		# Translators: the message when the outline level / style is changed in Microsoft word
+		ui.message(_("{styleName} style").format(styleName=field['style']))
