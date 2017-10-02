@@ -285,11 +285,11 @@ class MSHTML(VirtualBuffer):
 				{"IHTMLElement::isContentEditable":[1],"parent::IHTMLElement::isContentEditable":[0,None]},
 			]
 		elif nodeType=="radioButton":
-			attrs={"IAccessible::role":[oleacc.ROLE_SYSTEM_RADIOBUTTON],"IAccessible::state_%s"%oleacc.STATE_SYSTEM_FOCUSABLE:[1]}
+			attrs={"IAccessible::role":[oleacc.ROLE_SYSTEM_RADIOBUTTON]}
 		elif nodeType=="comboBox":
-			attrs={"IAccessible::role":[oleacc.ROLE_SYSTEM_COMBOBOX],"IAccessible::state_%s"%oleacc.STATE_SYSTEM_FOCUSABLE:[1]}
+			attrs={"IAccessible::role":[oleacc.ROLE_SYSTEM_COMBOBOX]}
 		elif nodeType=="checkBox":
-			attrs={"IAccessible::role":[oleacc.ROLE_SYSTEM_CHECKBUTTON],"IAccessible::state_%s"%oleacc.STATE_SYSTEM_FOCUSABLE:[1]}
+			attrs={"IAccessible::role":[oleacc.ROLE_SYSTEM_CHECKBUTTON]}
 		elif nodeType=="table":
 			attrs={"IHTMLDOMNode::nodeName":["TABLE"]}
 			if not config.conf["documentFormatting"]["includeLayoutTables"]:
