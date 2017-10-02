@@ -750,6 +750,9 @@ class MSHTML(IAccessible):
 		state=aria.ariaSortValuesToNVDAStates.get(ariaSort)
 		if state is not None:
 			states.add(state)
+		# #7637: MSHTML IAccessible doesn't expose the checked state for unavailable elements.
+		if 'checked' in self.HTMLAttributes:
+			states.add(controlTypes.STATE_CHECKED)
 		htmlRequired='required' in self.HTMLAttributes
 		ariaRequired=self.HTMLAttributes['aria-required']
 		if htmlRequired or ariaRequired=="true":

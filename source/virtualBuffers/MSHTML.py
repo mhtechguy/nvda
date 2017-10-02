@@ -75,6 +75,9 @@ class MSHTMLTextInfo(VirtualBufferTextInfo):
 			role=controlTypes.ROLE_TEXTFRAME
 		if 'IHTMLElement::isContentEditable' in attrs:
 			states.add(controlTypes.STATE_EDITABLE)
+		# #7637: MSHTML IAccessible doesn't expose the checked state for unavailable elements.
+		if 'HTMLAttrib::checked' in attrs:
+			states.add(controlTypes.STATE_CHECKED)
 		if 'HTMLAttrib::onclick' in attrs or 'HTMLAttrib::onmousedown' in attrs or 'HTMLAttrib::onmouseup' in attrs:
 			states.add(controlTypes.STATE_CLICKABLE)
 		if 'HTMLAttrib::required' in attrs or attrs.get('HTMLAttrib::aria-required','false')=='true':
