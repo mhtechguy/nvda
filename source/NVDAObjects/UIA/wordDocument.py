@@ -3,6 +3,7 @@
 #See the file COPYING for more details.
 #Copyright (C) 2016 NV Access Limited
 
+from comtypes import COMError
 from collections import defaultdict
 import textInfos
 import eventHandler
@@ -169,67 +170,95 @@ class WordDocument(UIADocumentWithTableNavigation,WordDocumentNode,WordDocumentB
 		# Translators: a message when increasing or decreasing font size in Microsoft Word
 		ui.message(_("{size:s} font").format(size=field['font-size']))
 
-	def script_toggleBold(self,gesture):
+	def _getFormatFieldAtPosition(self,info,formatConfig):
+		formatField=textInfos.FormatField()
+		for field in info.getTextWithFields(formatConfig):
+			if isinstance(field,textInfos.FieldCommand) and isinstance(field.field,textInfos.FormatField):
+				formatField.update(field.field)
+		return formatField
+
+	def _formatChangeScriptHelper(self,gesture,**kwargs):
+		formatConfig=defaultdict(lambda: False,**kwargs)
+		info=self.makeTextInfo(textInfos.POSITION_SELECTION)
+		if info.isCollapsed:
+			info.expand(textInfos.UNIT_CHARACTER)
+		oldFormatField=self._getFormatFieldAtPosition(info,formatConfig)
 		gesture.send()
-		info=self.makeTextInfo(textInfos.POSITION_CARET)
-		info.expand(textInfos.UNIT_CHARACTER)
-		formatConfig=defaultdict(lambda: False,reportFontAttributes=True)
-		field=info._getFormatFieldAtRange(info._rangeObj,formatConfig,ignoreMixedValues=True).field
-		if field['bold']:
-			# Translators: a message when toggling formatting in Microsoft word
-			ui.message(_("Bold on"))
-		else:
-			# Translators: a message when toggling formatting in Microsoft word
-			ui.message(_("Bold off"))
+		info=self.makeTextInfo(textInfos.POSITION_SELECTION)
+		if info.isCollapsed:
+			info.expand(textInfos.UNIT_CHARACTER)
+		newFormatField=self._getFormatFieldAtPosition(info,formatConfig)
+		text=info.getFormatFieldSpeech(newFormatField,attrsCache=oldFormatField,formatConfig=formatConfig,extraDetail=True)
+		ui.message(text)
+
+	def script_toggleBold(self,gesture):
+		self._formatChangeScriptHelper(gesture,reportFontAttributes=True)
 
 	def script_toggleItalic(self,gesture):
-		gesture.send()
-		info=self.makeTextInfo(textInfos.POSITION_CARET)
-		info.expand(textInfos.UNIT_CHARACTER)
-		formatConfig=defaultdict(lambda: False,reportFontAttributes=True)
-		field=info._getFormatFieldAtRange(info._rangeObj,formatConfig,ignoreMixedValues=True).field
-		if field['italic']:
-			# Translators: a message when toggling formatting in Microsoft word
-			ui.message(_("Italic on"))
-		else:
-			# Translators: a message when toggling formatting in Microsoft word
-			ui.message(_("Italic off"))
+		self._formatChangeScriptHelper(gesture,reportFontAttributes=True)
 
 	def script_toggleUnderline(self,gesture):
-		gesture.send()
-		info=self.makeTextInfo(textInfos.POSITION_CARET)
-		info.expand(textInfos.UNIT_CHARACTER)
-		formatConfig=defaultdict(lambda: False,reportFontAttributes=True)
-		field=info._getFormatFieldAtRange(info._rangeObj,formatConfig,ignoreMixedValues=True).field
-		if field['underline']:
-			# Translators: a message when toggling formatting in Microsoft word
-			ui.message(_("Underline on"))
-		else:
-			# Translators: a message when toggling formatting in Microsoft word
-			ui.message(_("Underline off"))
+		self._formatChangeScriptHelper(gesture,reportFontAttributes=True)
 
 	def script_toggleSuperscriptSubscript(self,gesture):
-		gesture.send()
-		info=self.makeTextInfo(textInfos.POSITION_CARET)
-		info.expand(textInfos.UNIT_CHARACTER)
-		formatConfig=defaultdict(lambda: False,reportFontAttributes=True)
-		field=info._getFormatFieldAtRange(info._rangeObj,formatConfig,ignoreMixedValues=True).field
-		textPosition=field['text-position']
-		if textPosition=='super':
-			# Translators: a message when toggling formatting in Microsoft word
-			ui.message(_("superscript"))
-		elif textPosition=='sub':
-			# Translators: a message when toggling formatting in Microsoft word
-			ui.message(_("subscript"))
-		else:
-			# Translators: a message when toggling formatting in Microsoft word
-			ui.message(_("baseline"))
+		self._formatChangeScriptHelper(gesture,reportFontAttributes=True)
 
 	def script_increaseDecreaseOutlineLevel(self,gesture):
+		self._formatChangeScriptHelper(gesture,reportStyle=True)
+
+	def script_caret_moveByCell(self,gesture):
 		gesture.send()
-		info=self.makeTextInfo(textInfos.POSITION_CARET)
-		info.expand(textInfos.UNIT_CHARACTER)
-		formatConfig=defaultdict(lambda: False,reportStyle=True)
-		field=info._getFormatFieldAtRange(info._rangeObj,formatConfig,ignoreMixedValues=True).field
-		# Translators: the message when the outline level / style is changed in Microsoft word
-		ui.message(_("{styleName} style").format(styleName=field['style']))
+		caretInfo=self.makeTextInfo(textInfos.POSITION_CARET)
+		try:
+			tableID, row, col, rowSpan, colSpan = self._getTableCellCoords(caretInfo)
+		except LookupError:
+			return
+		cellInfo=self._getTableCellAt(tableID,caretInfo,row,col)
+		speech.speakTextInfo(cellInfo,reason=controlTypes.REASON_CARET)
+
+	def script_toggleAlignment(self,gesture):
+		self._formatChangeScriptHelper(gesture,reportAlignment=True)
+
+	def script_changeLineSpacing(self,gesture):
+		self._formatChangeScriptHelper(gesture,reportLineSpacing=True)
+
+	def script_tab(self,gesture):
+		gesture.send()
+		caretInfo=self.makeTextInfo(textInfos.POSITION_CARET)
+		inTable=True
+		try:
+			tableID, row, col, rowSpan, colSpan = self._getTableCellCoords(caretInfo)
+		except LookupError:
+			inTable=False
+		if inTable:
+			cellInfo=self._getTableCellAt(tableID,caretInfo,row,col)
+			speech.speakTextInfo(cellInfo,reason=controlTypes.REASON_CARET)
+			return
+		caretInfo.move(textInfos.UNIT_LINE,1,endPoint="end")
+		speech.speakTextInfo(caretInfo,reason=controlTypes.REASON_CARET)
+
+	def script_reportCurrentComment(self,gesture):
+		caretInfo=self.makeTextInfo(textInfos.POSITION_CARET)
+		caretInfo.expand(textInfos.UNIT_CHARACTER)
+		val=caretInfo._rangeObj.getAttributeValue(UIAHandler.UIA_AnnotationObjectsAttributeId)
+		if not val:
+			return
+		try:
+			UIAElementArray=val.QueryInterface(UIAHandler.IUIAutomationElementArray)
+		except COMError:
+			print "not an array"
+			return
+		for index in xrange(UIAElementArray.length):
+			UIAElement=UIAElementArray.getElement(index)
+			UIAElement=UIAElement.buildUpdatedCache(UIAHandler.handler.baseCacheRequest)
+			obj=UIA(UIAElement=UIAElement)
+			if not obj.parent or obj.parent.name!='Comment':
+				continue
+			comment=obj.makeTextInfo(textInfos.POSITION_ALL).text
+			dateObj=obj.previous
+			date=dateObj.name
+			authorObj=dateObj.previous
+			author=authorObj.name
+			ui.message(_("{comment} by {author} on {date}").format(comment=comment,date=date,author=author))
+			return
+

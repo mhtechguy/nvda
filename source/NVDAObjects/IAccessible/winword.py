@@ -1433,37 +1433,6 @@ class WordDocument(WordDocumentBase, EditableTextWithoutAutoSelectDetection, IAc
 			# Translators: a message when toggling formatting in Microsoft word
 			ui.message(_("Baseline"))
 
-	def script_moveParagraphDown(self,gesture):
-		oldBookmark=self.makeTextInfo(textInfos.POSITION_CARET).bookmark
-		gesture.send()
-		if self._hasCaretMoved(oldBookmark)[0]:
-			info=self.makeTextInfo(textInfos.POSITION_SELECTION)
-			info.collapse()
-			info.move(textInfos.UNIT_PARAGRAPH,-1,endPoint="start")
-			lastParaText=info.text.strip()
-			if lastParaText:
-				# Translators: a message reported when a paragraph is moved below another paragraph
-				ui.message(_("Moved below %s")%lastParaText)
-			else:
-				# Translators: a message reported when a paragraph is moved below a blank paragraph 
-				ui.message(_("Moved below blank paragraph"))
-
-	def script_moveParagraphUp(self,gesture):
-		oldBookmark=self.makeTextInfo(textInfos.POSITION_CARET).bookmark
-		gesture.send()
-		if self._hasCaretMoved(oldBookmark)[0]:
-			info=self.makeTextInfo(textInfos.POSITION_SELECTION)
-			info.collapse()
-			info.move(textInfos.UNIT_PARAGRAPH,1)
-			info.expand(textInfos.UNIT_PARAGRAPH)
-			lastParaText=info.text.strip()
-			if lastParaText:
-				# Translators: a message reported when a paragraph is moved above another paragraph
-				ui.message(_("Moved above %s")%lastParaText)
-			else:
-				# Translators: a message reported when a paragraph is moved above a blank paragraph 
-				ui.message(_("Moved above blank paragraph"))
-
 	def script_increaseDecreaseOutlineLevel(self,gesture):
 		val=self._WaitForValueChangeForAction(lambda: gesture.send(),lambda: self.WinwordSelectionObject.paragraphFormat.outlineLevel)
 		style=self.WinwordSelectionObject.style.nameLocal
@@ -1645,6 +1614,18 @@ class WordDocument(WordDocumentBase, EditableTextWithoutAutoSelectDetection, IAc
 		info.updateCaret()
 		self._caretScriptPostMovedHelper(textInfos.UNIT_PARAGRAPH,gesture,None)
 	script_previousParagraph.resumeSayAllMode=sayAllHandler.CURSOR_CARET
+
+	__gestures={
+		"kb:control+alt+upArrow": "previousRow",
+		"kb:control+alt+downArrow": "nextRow",
+		"kb:control+alt+leftArrow": "previousColumn",
+		"kb:control+alt+rightArrow": "nextColumn",
+		"kb:control+downArrow":"nextParagraph",
+		"kb:control+upArrow":"previousParagraph",
+		"kb:NVDA+shift+c":"setColumnHeader",
+		"kb:NVDA+shift+r":"setRowHeader",
+		"kb:NVDA+shift+h":"reportCurrentHeaders",
+	}
 
 class WordDocument_WwN(WordDocument):
 

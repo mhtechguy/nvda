@@ -151,6 +151,8 @@ class UIATextInfo(textInfos.TextInfo):
 			if formatConfig["reportColor"]:
 				IDs.add(UIAHandler.UIA_BackgroundColorAttributeId)
 				IDs.add(UIAHandler.UIA_ForegroundColorAttributeId)
+			if formatConfig['reportLineSpacing']:
+				IDs.add(UIAHandler.UIA_LineSpacingAttributeId)
 			if formatConfig['reportLinks']:
 				IDs.add(UIAHandler.UIA_LinkAttributeId)
 			if formatConfig['reportStyle']:
@@ -222,6 +224,11 @@ class UIATextInfo(textInfos.TextInfo):
 			val=fetcher.getValue(UIAHandler.UIA_ForegroundColorAttributeId,ignoreMixedValues=ignoreMixedValues)
 			if isinstance(val,int):
 				formatField['color']=colors.RGB.fromCOLORREF(val)
+		if formatConfig['reportLineSpacing']:
+			val=fetcher.getValue(UIAHandler.UIA_LineSpacingAttributeId,ignoreMixedValues=ignoreMixedValues)
+			if val!=UIAHandler.handler.reservedNotSupportedValue:
+				if val:
+					formatField['line-spacing']=val
 		if formatConfig['reportLinks']:
 			val=fetcher.getValue(UIAHandler.UIA_LinkAttributeId,ignoreMixedValues=ignoreMixedValues)
 			if val!=UIAHandler.handler.reservedNotSupportedValue:
